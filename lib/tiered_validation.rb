@@ -1,102 +1,74 @@
-module TieredValidation
+require 'tiered_validation/validation_tier'
+require 'tiered_validation/callback_chain_extensions'
+require 'tiered_validation/record_invalid_for_tier'
+
+module TieredValidation    
   def self.included(base)
     base.extend(ClassMethods)
   end
-  
-  module ::ActiveRecord
-    class RecordInvalidForTier < ActiveRecordError
-      attr_reader :record
-      def initialize(tier, record)
-        @record = record
-        super("Validation for #{tier} failed: #{@record.errors.full_messages.join(", ")}")
+
+  VALIDATION_TIERS = {}
+
+  module ClassMethods
+    def validation_tier(name, options = {}, &block)
+      options = {:includes => [], :exclusive => true}.merge(options)
+      tier = ValidationTier.new(name, self, options[:includes], options[:exclusive])
+      VALIDATION_TIERS[name] = tier
+
+      tier.setup_alias_methods
+      class_eval &block
+      tier.teardown_alias_methods
+      
+      tier.add_convenience_methods
+    end
+    
+    def create_with_tier_validation!(tier, attributes = nil, &block)
+      if attributes.is_a?(Array)
+        attributes.collect { |attr| create_with_tier_validation!(tier, attr, &block) }
+      else
+        object = new(attributes)
+        yield(object) if block_given?
+        object.save_with_tier_validation!(tier)
+        object
       end
     end
   end
+
+  def valid_for_tier?(tier)
+    tier = VALIDATION_TIERS[tier]
+    errors.clear
+
+    tier.run_callbacks(:save, self)
+    validate
+    
+    if new_record?
+      tier.run_callbacks(:create, self)
+      validate_on_create
+    else
+      tier.run_callbacks(:update, self)
+      validate_on_update
+    end
+    
+    errors.empty?
+  end
   
-  module ClassMethods
-    def validation_tier(tier, &block)
-      save_callback = "validate_for_#{tier}_on_save"
-      update_callback = "validate_for_#{tier}_on_update"
-      create_callback = "validate_for_#{tier}_on_create"
-
-      define_callbacks save_callback, update_callback, create_callback
-      
-      class_eval <<-BLOCK, __FILE__, __LINE__ + 1
-        def self.validate_on_save_with_tier(*methods, &block)
-          #{save_callback} *methods, &block
-          validate_on_save_without_tier *methods, &block
-        end
-        
-        def self.validate_on_update_with_tier(*methods, &block)
-          #{update_callback} *methods, &block
-          validate_on_update_without_tier *methods, &block
-        end
-        
-        def self.validate_on_create_with_tier(*methods, &block)
-          #{create_callback} *methods, &block
-          validate_on_create_without_tier *methods, &block
-        end
-        
-        def self.create_with_#{tier}_validation!(attributes = nil, &block)
-          if attributes.is_a?(Array)
-            attributes.collect { |attr| create_with_#{tier}_validation!(attr, &block) }
-          else
-            object = new(attributes)
-            yield(object) if block_given?
-            object.save_with_#{tier}_validation!
-            object
-          end
-        end
-        
-        def save_with_#{tier}_validation
-          valid_for_#{tier}? ? save : false
-        end
-        
-        def save_with_#{tier}_validation!
-          if valid_for_#{tier}?
-            save!
-          else
-            raise ActiveRecord::RecordInvalidForTier.new(:#{tier}, self)
-          end
-        end
-
-        def valid_for_#{tier}?
-          errors.clear
-
-          run_callbacks(:validate)
-          run_callbacks(:#{save_callback})
-          validate
-
-          if new_record?
-            run_callbacks(:validate_on_create)
-            run_callbacks(:#{create_callback})
-            validate_on_create
-          else
-            run_callbacks(:validate_on_update)
-            run_callbacks(:#{update_callback})
-            validate_on_update
-          end
-
-          errors.empty?
-        end
-        
-        def invalid_for_#{tier}?
-          !valid_for_#{tier}?
-        end
-        
-        class << self  
-          alias_method :validate_on_save_without_tier, :validate
-          alias_method :validate, :validate_on_save_with_tier
-          
-          alias_method :validate_on_update_without_tier, :validate_on_update
-          alias_method :validate_on_update, :validate_on_update_with_tier
-          
-          alias_method :validate_on_create_without_tier, :validate_on_create
-          alias_method :validate_on_create, :validate_on_create_with_tier
-        end
-      BLOCK
-      
-      class_eval &block
+  def save_with_tier_validation(tier)
+    if valid_for_tier?(tier) and valid?
+      save
+    else
+      false
+    end
+  end
+  
+  def save_with_tier_validation!(tier)
+    if valid_for_tier?(tier)
+      if valid?
+        save!
+      else
+        raise ActiveRecord::RecordInvalid.new(self)
+      end
+    else
+      raise ActiveRecord::RecordInvalidForTier.new(tier, self)
     end
   end
 end

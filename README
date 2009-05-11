@@ -1,13 +1,44 @@
 TieredValidation
 ================
 
-Introduction goes here.
+Allows validations to be grouped into tiers. This means that the same model can simultaneously be considered valid and invalid depending upon one's perspective.
 
 
 Example
 =======
 
-Example goes here.
+class Author < ActiveRecord::Base
+  validation_tier :admin do
+    validates_presence_of :first_name, :last_name
+  end
+  
+  validation_tier :user, :includes => :admin do
+    validates_presence_of :description
+  end
+end
+
+>> a = Author.new
+=> #<Author id: nil, first_name: nil, last_name: nil, description: nil, created_at: nil, updated_at: nil>
+>> a.valid?
+=> true
+>> a.valid_for_admin?
+=> false
+>> a.valid_for_user?
+=> false
+>> a.first_name = "Joseph"
+=> "Joseph"
+>> a.last_name = "Bazalgette"
+=> "Bazalgette"
+>> a.valid_for_admin?
+=> true
+>> a.valid_for_user?
+=> false
+>> a.save_with_user_validation
+=> false
+>> a.save_with_user_validation!
+=> ActiveRecord::RecordInvalidForTier: Validation for user failed: Description can't be blank
+>> a.save_with_admin_validation!
+=> true
 
 
-Copyright (c) 2009 [name of plugin creator], released under the MIT license
+Copyright (c) 2009 Kevin Hyland, released under the MIT license
