@@ -13,16 +13,14 @@ module TieredValidation
       @klass = klass
       @included_tiers = includes.is_a?(Array) ? includes : [includes].compact
       @exclusive = exclusive
-      @callbacks = {}
       
       DEFAULT_ACTION_CALLBACK_MAP.each do |action, default_callback|
         @klass.define_callbacks callback_name(default_callback)
-        @callbacks[action] = @klass.__send__ callback_chain_name(default_callback)
       end
     end
 
     def callback_chain(action)
-      callback_chain = @callbacks[action].clone
+      callback_chain = base_callback_chain(action).clone
 
       @included_tiers.each do |tier|
         callback_chain += @klass::VALIDATION_TIERS[tier].callback_chain(action) 
@@ -99,6 +97,11 @@ module TieredValidation
     end
     
     protected
+      def base_callback_chain(action)
+        @base_callback_chains ||= {}
+        @base_callback_chains[action] ||= @klass.__send__ callback_chain_name(DEFAULT_ACTION_CALLBACK_MAP[action])
+      end
+
       def callback_name(default_callback)
         "#{default_callback}_for_#{@name}"
       end
