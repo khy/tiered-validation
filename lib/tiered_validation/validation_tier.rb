@@ -13,10 +13,7 @@ module TieredValidation
       @klass = klass
       @included_tiers = includes.is_a?(Array) ? includes : [includes].compact
       @exclusive = exclusive
-      
-      DEFAULT_ACTION_CALLBACK_MAP.each do |action, default_callback|
-        @klass.define_callbacks callback_name(default_callback)
-      end
+      @klass.define_callbacks *DEFAULT_VALIDATION_CALLBACKS.map{|default_callback| callback_name(default_callback)}
     end
 
     def callback_chain(action)
