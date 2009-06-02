@@ -55,47 +55,47 @@ describe 'Validation tier convenience methods' do
     it 'should create an instance using the specified tier validation' do
       Account.create_with_user_validation!(:expiration_date => Time.now).should be_a_kind_of(Account)
     end
-  
+
     it 'should raise a RecordInvalidForTier error if tier validation fails' do
       lambda{Account.create_with_user_validation!}.should raise_error(ActiveRecord::RecordInvalidForTier)
     end
   end
-  
+
   describe '#save_with_[tier]_validation' do
     it 'should create an instance using the specified tier validation' do
       Account.new(:expiration_date => Time.now).save_with_user_validation.should be_true
     end
-  
+
     it 'should raise a RecordInvalidForTier error if tier validation fails' do
       Account.new.save_with_user_validation.should be_false
     end
   end
-  
+
   describe '#save_with_[tier]_validation!' do
     it 'should create an instance using the specified tier validation' do
       Account.new(:expiration_date => Time.now).save_with_user_validation!.should be_true
     end
-  
+
     it 'should raise a RecordInvalidForTier error if tier validation fails' do
       lambda{Account.new.save_with_user_validation!}.should raise_error(ActiveRecord::RecordInvalidForTier)
     end
   end
-  
+
   describe '#valid_for_[tier]?' do
     it 'should create an instance using the specified tier validation' do
       Account.new(:expiration_date => Time.now).valid_for_user?.should be_true
     end
-  
+
     it 'should raise a RecordInvalidForTier error if tier validation fails' do
       Account.new.valid_for_user?.should be_false
     end
   end
-  
+
   describe '#invalid_for_[tier]?' do
     it 'should create an instance using the specified tier validation' do
       Account.new(:expiration_date => Time.now).invalid_for_user?.should be_false
     end
-  
+
     it 'should raise a RecordInvalidForTier error if tier validation fails' do
       Account.new.invalid_for_user?.should be_true
     end
@@ -134,7 +134,7 @@ describe 'Validation tier' do
     account.number = '1234'
     account.should be_valid_for_pirate
   end
-  
+
   it 'should use on update option' do
     account = Account.new(:number => '1234')
     account.save
@@ -149,81 +149,81 @@ describe 'Validation tier' do
     account.login.username = 'jah123'
     account
   end
-  
+
   before(:all) do
     Account.delete_all
   end
-  
+
   before(:each) do
     @account = build_account
     @account.should be_valid_for_admin
   end
-  
+
   it 'should appropriately apply validates_acceptance_of' do
     @account.eula = false
     @account.should_not be_valid_for_admin
     @account.errors.on(:eula).should_not be_nil
   end
-  
+
   it 'should appropriately apply validates_associated' do
     @account.login.username = nil
     @account.should_not be_valid_for_admin
     @account.errors.on(:login).should_not be_nil
   end
-  
+
   it 'should appropriately apply validates_confirmation_of' do
     @account.number_confirmation = '135791'
     @account.should_not be_valid_for_admin
     @account.errors.on(:number).should_not be_nil
   end
-  
+
   it 'should appropriately apply validates_each' do
     @account.number = '111111'
     @account.number_confirmation = '111111'
     @account.should_not be_valid_for_admin
     @account.errors.on(:number).should_not be_nil
   end
-  
+
   it 'should appropriately apply validates_exclusion_of' do
     @account.number = '123581'
     @account.number_confirmation = '123581'
     @account.should_not be_valid_for_admin
     @account.errors.on(:number).should_not be_nil
   end
-  
+
   it 'should appropriately apply validates_format_of' do
     @account.number = '234567'
     @account.number_confirmation = '234567'
     @account.should_not be_valid_for_admin
     @account.errors.on(:number).should_not be_nil
   end
-  
+
   it 'should appropriately apply validates_inclusion_of' do
     @account.balance = -5
     @account.should_not be_valid_for_admin
     @account.errors.on(:balance).should_not be_nil
   end
-  
+
   it 'should appropriately apply validates_length_of' do
     @account.number = '1234567'
     @account.number_confirmation = '1234567'
     @account.should_not be_valid_for_admin
     @account.errors.on(:number).should_not be_nil
   end
-  
+
   it 'should appropriately apply validates_numericality_of' do
     @account.number = '123ABC'
     @account.number_confirmation = '123ABC'
     @account.should_not be_valid_for_admin
     @account.errors.on(:number).should_not be_nil
   end
-  
+
   it 'should appropriately apply validates_presence_of' do
     @account.balance = nil
     @account.should_not be_valid_for_admin
     @account.errors.on(:balance).should_not be_nil
   end
-  
+
   it 'should appropriately apply validates_presence_of' do
     @account.save
     new_account = build_account

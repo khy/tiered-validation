@@ -1,6 +1,12 @@
-require 'active_record'
 $: << File.expand_path("#{File.dirname(__FILE__)}/../lib")
-require File.dirname(__FILE__) + '/../init'
+
+if version = ENV['ACTIVE_RECORD_VERSION']
+  require 'rubygems'
+  gem 'activerecord', version
+end
+
+require 'activerecord'
+require File.expand_path(File.dirname(__FILE__) + '/../init')
 
 db_location = "#{File.dirname(__FILE__)}/db"
 db_config = {"adapter"=>"sqlite3", "database"=>"#{db_location}/test.db"}
