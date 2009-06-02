@@ -1,4 +1,5 @@
 require 'tiered_validation/validation_tier'
+require 'tiered_validation/validation_tier_with_callback'
 require 'tiered_validation/callback_chain_extensions'
 require 'tiered_validation/record_invalid_for_tier'
 
@@ -62,7 +63,7 @@ module TieredValidation
     #       <tt>false</tt> if validations for <tt>tier</tt> pass; <tt>true</tt> otherwise.
     def validation_tier(name, options = {}, &block)
       options = {:includes => [], :exclusive => true}.merge(options)
-      tier = ValidationTier.new(name, self, options[:includes], options[:exclusive])
+      tier = ValidationTier.for(name, self, options[:includes], options[:exclusive])
       VALIDATION_TIERS[name] = tier
 
       tier.setup_alias_methods
@@ -90,14 +91,14 @@ module TieredValidation
     tier = VALIDATION_TIERS[tier]
     errors.clear
 
-    tier.run_callbacks(:save, self)
+    tier.run_validations(:save, self)
     validate
     
     if new_record?
-      tier.run_callbacks(:create, self)
+      tier.run_validations(:create, self)
       validate_on_create
     else
-      tier.run_callbacks(:update, self)
+      tier.run_validations(:update, self)
       validate_on_update
     end
     
