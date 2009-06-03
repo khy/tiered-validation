@@ -14,18 +14,22 @@ module TieredValidation
     
       def callback_chain(action)
         callback_chain = base_callback_chain(action).clone
+        callback_chain |= default_callback_chain(action)
 
         @included_tiers.each do |tier|
-          callback_chain += @klass::VALIDATION_TIERS[tier].callback_chain(action) 
+          callback_chain |= @klass::VALIDATION_TIERS[tier].callback_chain(action) 
         end
-      
-        callback_chain.uniq
+
+        callback_chain
       end
 
       def base_callback_chain(action)
-        @base_callback_chains ||= {}
         callback_chain_name = validation_callback_chain_name(DEFAULT_ACTION_VALIDATION_MAP[action])
-        @base_callback_chains[action] ||= @klass.__send__ callback_chain_name
+        @klass.__send__ callback_chain_name
+      end
+
+      def default_callback_chain(action)
+        @klass.__send__ DEFAULT_ACTION_VALIDATION_MAP[action]
       end
 
       def validation_callback_chain_name(default_callback)

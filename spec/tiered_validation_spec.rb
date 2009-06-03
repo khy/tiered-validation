@@ -141,6 +141,11 @@ describe 'Validation tier' do
     account.save
     account.should_not be_valid_for_pirate
   end
+  
+  it 'should include any default validations' do
+    account = Account.new(:number => '1ab', :expiration_date => 2.days.from_now)
+    account.should_not be_valid_for_user
+  end
 end
 
 describe 'Validation tier' do
