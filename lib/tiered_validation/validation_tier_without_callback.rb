@@ -4,7 +4,7 @@ module TieredValidation
   class ValidationTierWithoutCallbacks < ValidationTier
     def run_validations(action, instance)
       add_included_tiers(action)
-      instance.method(:run_validations).call validation_name_for_action(action)
+      instance.method(:run_validations).call validation_symbol_for_action(action)
     end
     
     protected
@@ -24,18 +24,18 @@ module TieredValidation
       end
       
       def validation_chain(action)
-        @klass.read_inheritable_attribute validation_name_for_action(action)
+        @klass.read_inheritable_attribute validation_symbol_for_action(action)
       end
 
       def add_included_tiers(action)
         @included_tiers.each do |tier_name|
           if validation_chain = @klass::VALIDATION_TIERS[tier_name].validation_chain(action)
-            @klass.__send__ validation_name_for_action(action), *validation_chain
+            @klass.__send__ validation_symbol_for_action(action), *validation_chain
           end
         end
       end
       
-      def validation_name_for_action(action)
+      def validation_symbol_for_action(action)
         validation_name(DEFAULT_ACTION_VALIDATION_MAP[action]).to_sym
       end
   end
