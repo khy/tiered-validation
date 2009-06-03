@@ -63,7 +63,7 @@ module TieredValidation
     # * <tt>#invalid_for_[tier]?</tt>
     #       <tt>false</tt> if validations for <tt>tier</tt> pass; <tt>true</tt> otherwise.
     def validation_tier(name, options = {}, &block)
-      options = {:includes => [], :exclusive => true}.merge(options)
+      options.reverse_merge!(:includes => [], :exclusive => true)
       tier = ValidationTier.for(name, self, options[:includes], options[:exclusive])
       VALIDATION_TIERS[name] = tier
 
