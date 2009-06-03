@@ -63,17 +63,17 @@ describe 'Validation tier convenience methods' do
   end
 
   describe '#save_with_[tier]_validation' do
-    it 'should create an instance using the specified tier validation' do
+    it 'should return true if instance is saved with tier validation' do
       Account.new(:expiration_date => Time.now).save_with_user_validation.should be_true
     end
   
-    it 'should raise a RecordInvalidForTier error if tier validation fails' do
+    it 'should return false if tier validation fails' do
       Account.new.save_with_user_validation.should be_false
     end
   end
   
   describe '#save_with_[tier]_validation!' do
-    it 'should create an instance using the specified tier validation' do
+    it 'should return true if instance is saved with tier validation' do
       Account.new(:expiration_date => Time.now).save_with_user_validation!.should be_true
     end
   
@@ -83,21 +83,21 @@ describe 'Validation tier convenience methods' do
   end
   
   describe '#valid_for_[tier]?' do
-    it 'should create an instance using the specified tier validation' do
+    it 'should return false if tier validation fails' do
       Account.new(:expiration_date => Time.now).valid_for_user?.should be_true
     end
   
-    it 'should raise a RecordInvalidForTier error if tier validation fails' do
+    it 'should return false if tier validation fails' do
       Account.new.valid_for_user?.should be_false
     end
   end
   
   describe '#invalid_for_[tier]?' do
-    it 'should create an instance using the specified tier validation' do
+    it 'should return false if tier validation passes' do
       Account.new(:expiration_date => Time.now).invalid_for_user?.should be_false
     end
   
-    it 'should raise a RecordInvalidForTier error if tier validation fails' do
+    it 'should return true if tier validation fails' do
       Account.new.invalid_for_user?.should be_true
     end
   end
