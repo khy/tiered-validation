@@ -37,6 +37,5 @@ Allows validations to be grouped into tiers. This means that the same model can 
   => ActiveRecord::RecordInvalidForTier: Validation for user failed: Description can't be blank
   >> a.save_with_admin_validation!
   => true
-  </tt>
 
 Copyright (c) 2009 Kevin Hyland, released under the MIT license
