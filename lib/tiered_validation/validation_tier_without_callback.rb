@@ -10,6 +10,10 @@ module TieredValidation
     protected
       def define_validation_chains
         DEFAULT_VALIDATIONS.each do |default_validation|
+          # def self.validate_for_admin(*methods, &block)
+          #   methods << block if block_given?
+          #   write_inheritable_set(:validate_for_admin, methods)
+          # end
           @klass.class_eval  <<-BLOCK, __FILE__, __LINE__ + 1
             def self.#{validation_name(default_validation)}(*methods, &block)
               methods << block if block_given?
