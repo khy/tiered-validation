@@ -1,6 +1,7 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 class Login < ActiveRecord::Base
+  belongs_to :account
   validates_presence_of :username
 end
 
@@ -55,7 +56,7 @@ describe 'Validation tier convenience methods' do
     it 'should create an instance using the specified tier validation' do
       Account.create_with_user_validation!(:expiration_date => Time.now).should be_a_kind_of(Account)
     end
-
+  
     it 'should raise a RecordInvalidForTier error if tier validation fails' do
       lambda{Account.create_with_user_validation!}.should raise_error(ActiveRecord::RecordInvalidForTier)
     end
@@ -65,37 +66,37 @@ describe 'Validation tier convenience methods' do
     it 'should create an instance using the specified tier validation' do
       Account.new(:expiration_date => Time.now).save_with_user_validation.should be_true
     end
-
+  
     it 'should raise a RecordInvalidForTier error if tier validation fails' do
       Account.new.save_with_user_validation.should be_false
     end
   end
-
+  
   describe '#save_with_[tier]_validation!' do
     it 'should create an instance using the specified tier validation' do
       Account.new(:expiration_date => Time.now).save_with_user_validation!.should be_true
     end
-
+  
     it 'should raise a RecordInvalidForTier error if tier validation fails' do
       lambda{Account.new.save_with_user_validation!}.should raise_error(ActiveRecord::RecordInvalidForTier)
     end
   end
-
+  
   describe '#valid_for_[tier]?' do
     it 'should create an instance using the specified tier validation' do
       Account.new(:expiration_date => Time.now).valid_for_user?.should be_true
     end
-
+  
     it 'should raise a RecordInvalidForTier error if tier validation fails' do
       Account.new.valid_for_user?.should be_false
     end
   end
-
+  
   describe '#invalid_for_[tier]?' do
     it 'should create an instance using the specified tier validation' do
       Account.new(:expiration_date => Time.now).invalid_for_user?.should be_false
     end
-
+  
     it 'should raise a RecordInvalidForTier error if tier validation fails' do
       Account.new.invalid_for_user?.should be_true
     end

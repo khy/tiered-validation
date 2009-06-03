@@ -9,11 +9,9 @@ module TieredValidation
     DEFAULT_VALIDATIONS = DEFAULT_ACTION_VALIDATION_MAP.values.freeze
     
     def self.for(name, klass, includes = [], exclusive = true)
-      if uses_callbacks?(klass)
-        tier_class = ValidationTierWithCallbacks
-      else
-      end
-      
+      tier_class = uses_callbacks?(klass) ?
+        ValidationTierWithCallbacks : ValidationTierWithoutCallbacks
+
       tier_class.new(name, klass, includes, exclusive)
     end
 
@@ -145,7 +143,7 @@ module TieredValidation
     
     private
       def self.uses_callbacks?(klass)
-        true
+        klass.respond_to?(:define_callbacks)
       end
   end
 end
