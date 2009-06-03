@@ -1,5 +1,3 @@
-require 'tiered_validation/validation_tier'
-
 module TieredValidation
   class ValidationTierWithoutCallbacks < ValidationTier
     def run_validations(action, instance)

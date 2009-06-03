@@ -1,10 +1,11 @@
-require 'tiered_validation/validation_tier'
-require 'tiered_validation/validation_tier_with_callback'
-require 'tiered_validation/validation_tier_without_callback'
 require 'tiered_validation/callback_chain_extensions'
 require 'tiered_validation/record_invalid_for_tier'
 
-module TieredValidation    
+module TieredValidation
+  autoload :ValidationTier, 'tiered_validation/validation_tier'
+  autoload :ValidationTierWithCallbacks,  'tiered_validation/validation_tier_with_callback'
+  autoload :ValidationTierWithoutCallbacks,  'tiered_validation/validation_tier_without_callback'
+  
   def self.included(base) #:nodoc:
     base.extend(ClassMethods)
   end

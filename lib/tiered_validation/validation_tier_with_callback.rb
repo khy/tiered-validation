@@ -1,5 +1,3 @@
-require 'tiered_validation/validation_tier'
-
 module TieredValidation
   class ValidationTierWithCallbacks < ValidationTier
     def run_validations(action, instance)
@@ -8,7 +6,7 @@ module TieredValidation
     
     protected
       def define_validation_chains
-        validation_names = ValidationTier::DEFAULT_VALIDATIONS.map do |default_validation|
+        validation_names = DEFAULT_VALIDATIONS.map do |default_validation|
           validation_name(default_validation)
         end
         @klass.define_callbacks *validation_names
@@ -26,7 +24,7 @@ module TieredValidation
 
       def base_callback_chain(action)
         @base_callback_chains ||= {}
-        callback_chain_name = validation_callback_chain_name(ValidationTier::DEFAULT_ACTION_VALIDATION_MAP[action])
+        callback_chain_name = validation_callback_chain_name(DEFAULT_ACTION_VALIDATION_MAP[action])
         @base_callback_chains[action] ||= @klass.__send__ callback_chain_name
       end
 
