@@ -37,7 +37,7 @@ module TieredValidation
 
       def append_included_tier_validations(action)
         @included_tiers.each do |tier_name|
-          validation_chain = @klass::VALIDATION_TIERS[tier_name].validation_chain(action)
+          validation_chain = @klass.validation_tiers[tier_name].validation_chain(action)
           append_validation_chain(action, validation_chain)
         end
       end

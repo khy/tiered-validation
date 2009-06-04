@@ -17,7 +17,7 @@ module TieredValidation
         callback_chain |= default_callback_chain(action)
 
         @included_tiers.each do |tier|
-          callback_chain |= @klass::VALIDATION_TIERS[tier].callback_chain(action) 
+          callback_chain |= @klass.validation_tiers[tier].callback_chain(action) 
         end
 
         callback_chain

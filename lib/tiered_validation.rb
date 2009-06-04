@@ -7,10 +7,13 @@ module TieredValidation
   autoload :ValidationTierWithoutCallbacks,  'tiered_validation/validation_tier_without_callback'
   
   def self.included(base) #:nodoc:
-    base.extend(ClassMethods)
+    base.class_eval do
+      class_inheritable_accessor :validation_tiers
+      self.validation_tiers = {}
+      
+      extend ClassMethods
+    end
   end
-
-  VALIDATION_TIERS = {}
 
   module ClassMethods
     # Defines a validation tier (i.e. a group of validations to be run as a unit)
@@ -66,7 +69,7 @@ module TieredValidation
     def validation_tier(name, options = {}, &block)
       options.reverse_merge!(:includes => [], :exclusive => true)
       tier = ValidationTier.for(name, self, options[:includes], options[:exclusive])
-      VALIDATION_TIERS[name] = tier
+      self.validation_tiers[name] = tier
 
       tier.setup_alias_methods
       class_eval &block
@@ -90,7 +93,7 @@ module TieredValidation
 
   # Returns <tt>true</tt> if the record is valid for <tt>tier</tt>
   def valid_for_tier?(tier)
-    tier = VALIDATION_TIERS[tier]
+    tier = validation_tiers[tier]
     errors.clear
 
     tier.run_validations(:save, self)
